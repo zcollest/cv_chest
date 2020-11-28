@@ -7,3 +7,5 @@ interesting links on image procesing:
 https://www.codementor.io/@innat_2k14/image-data-analysis-using-numpy-opencv-part-1-kfadbafx6
 
 https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_tutorials.html
+
+https://www.kdnuggets.com/2017/06/medical-image-analysis-deep-learning-part-3.html
