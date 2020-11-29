@@ -2,9 +2,10 @@
 
 # step 1 - script for reading images and normalize data (maybe)
 # step 2 - divide data in category
-- define categories (classes). We already have labels but for a convolutional neural network (CNN) , if we want to use it, classification works best if each data (image) appertains to only one class/has only one lables. 
-- if one image belongs to more than one category (class) we should try label it as best as we can (KNN?)
-- consider data augmentation or downloading whole dataset.
+- a) define categories (classes). We already have labels but for a convolutional neural network (CNN) , if we want to use it, classification works best if each data (image) appertains to only one class/has only one lables. 
+Or maybe just reuse images. If an image has two or more labels just consider it as a member of two or more classes.
+- b) if one image belongs to more than one category (class) we should try label it as best as we can (KNN?)
+- c) consider data augmentation or downloading whole dataset.
 
 
 interesting links on image procesing: 
