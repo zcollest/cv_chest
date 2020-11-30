@@ -1,0 +1,7 @@
+November 29, 2020 (zach):
+- created function to resize images, turn them to grayscale, and save in numpy array
+- added a requiremements.txt file
+
+- next steps:
+	1. figure out how to incorporate labels with CNN
+	2. normalize array data (probably just by dividng each value by 255)
