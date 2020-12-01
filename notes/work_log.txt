@@ -5,3 +5,13 @@ November 29, 2020 (zach):
 - next steps:
 	1. figure out how to incorporate labels with CNN
 	2. normalize array data (probably just by dividng each value by 255)
+	
+December 1, 2020 (angelo):
+-merged zach branch
+-added command line argument --user for specifying who is using the script. If --user is "zach" the data are taken from the directory Zach has on his machine.
+If --user is "angelo" the data are taken from the directory Angelo has on his machine
+
+- next steps:
+	1. figure out how to incorporate labels with CNN  => check https://keras.io/api/preprocessing/image/ , basically we need to define the folder structure, tell me when you read this, I can explain what I mean
+	2. normalize array data (probably just by dividng each value by 255) => Yes you are right and I believe there is a function in Keras that does just that.
+
