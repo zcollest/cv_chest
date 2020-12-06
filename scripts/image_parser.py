@@ -24,7 +24,7 @@ if user == "zach":
 	PATH = 'cv_chest/data/sample/'
 	SOURCE_IMAGES = os.path.join(PATH, "sample", "images")
 	images = glob(os.path.join(SOURCE_IMAGES, "*.png"))
-
+    
 	# Load labels
 	labels = pd.read_csv(os.path.join(PATH, 'sample_labels.csv'))
 elif user == "angelo":
@@ -32,7 +32,6 @@ elif user == "angelo":
 	PATH = 'data/sample/'
 	SOURCE_IMAGES = os.path.join(PATH, 'sample', 'images')
 	images = glob(os.path.join(SOURCE_IMAGES, "*.png"))
-
 def process_images():
     """
     1. converts images to gray scale
