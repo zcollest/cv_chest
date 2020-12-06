@@ -18,36 +18,36 @@ args = my_parser.parse_args()
 
 user = args.user
 
-file_name = './sample_labels.csv'
-
 # Prepare file directories and image paths
 if user == "zach":
-	os.chdir('/Users/zacharycollester/Documents/')
-	PATH = 'cv_chest/data/sample/'
-	SOURCE_IMAGES = os.path.join(PATH, "sample", "images")
-	images = glob(os.path.join(SOURCE_IMAGES, "*.png"))
+    os.chdir('/Users/zacharycollester/Documents/')
+    PATH = 'cv_chest/data/sample/'
+    SOURCE_IMAGES = os.path.join(PATH, "sample", "images")
+    file_name = os.path.join(PATH, "sample_labels.csv")
 
-	# Load labels
-	labels = pd.read_csv(os.path.join(PATH, 'sample_labels.csv'))
 elif user == "angelo":
 	os.chdir('/home/angelo/Desktop/cv_chest/archive')
 	PATH = 'data/sample/'
 	SOURCE_IMAGES = os.path.join(PATH, 'sample', 'images')
-	images = glob(os.path.join(SOURCE_IMAGES, "*.png"))
-	file_name = './sample_labels.csv'
+	file_name = 'sample_labels.csv'
 
 def process_images(width,height):
     """
-    1. converts images to gray scale
-    2. resizes images
-    3. stores data in list of np arrays
+    1. resizes images
+    2. stores data in dictionary 
+        - key is image ID
+        - values include resized image arrays and class labels (both primary and subclass labels)
     """
-    images = pd.read_csv(file_name)
-    x = [] # images as arrays
-    for img in images:
-        full_size_image = cv.imread(img)
-        grey = cv.cvtColor(full_size_image, cv.COLOR_BGR2GRAY)
-        x.append(cv.resize(grey, (width,height), interpolation=cv.INTER_CUBIC))
+    samples = pd.read_csv(file_name)
+    images = samples['Image_Index']
+    x = {} # images as arrays
+    for i, img in enumerate(images):
+        full_size_image = cv.imread(os.path.join("./",SOURCE_IMAGES,img.split('/')[-1]))
+        #grey = cv.cvtColor(full_size_image, cv.COLOR_BGR2GRAY)
+        x[img] = {}
+        x[img]['array'] = cv.resize(full_size_image, (width,height), interpolation=cv.INTER_CUBIC)
+        x[img]['class'] = samples.iloc[i]['Finding_Labels'].split('|')[0]
+        if len(samples.iloc[i]['Finding_Labels'].split('|')) > 1:
+            x[img]['subclass'] = samples.iloc[i]['Finding_Labels'].split('|')[1:]
     return x	
-
 x = process_images(128,128)
