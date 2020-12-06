@@ -18,6 +18,8 @@ args = my_parser.parse_args()
 
 user = args.user
 
+file_name = './sample_labels.csv'
+
 # Prepare file directories and image paths
 if user == "zach":
 	os.chdir('/Users/zacharycollester/Documents/')
@@ -28,24 +30,24 @@ if user == "zach":
 	# Load labels
 	labels = pd.read_csv(os.path.join(PATH, 'sample_labels.csv'))
 elif user == "angelo":
-	os.chdir('/home/angelo/Desktop/cv_chest/')
+	os.chdir('/home/angelo/Desktop/cv_chest/archive')
 	PATH = 'data/sample/'
 	SOURCE_IMAGES = os.path.join(PATH, 'sample', 'images')
 	images = glob(os.path.join(SOURCE_IMAGES, "*.png"))
+	file_name = './sample_labels.csv'
 
-def process_images():
+def process_images(width,height):
     """
     1. converts images to gray scale
     2. resizes images
     3. stores data in list of np arrays
     """
+    images = pd.read_csv(file_name)
     x = [] # images as arrays
-    WIDTH = 128
-    HEIGHT = 128
     for img in images:
         full_size_image = cv.imread(img)
         grey = cv.cvtColor(full_size_image, cv.COLOR_BGR2GRAY)
-        x.append(cv.resize(grey, (WIDTH,HEIGHT), interpolation=cv.INTER_CUBIC))
-    return x
+        x.append(cv.resize(grey, (width,height), interpolation=cv.INTER_CUBIC))
+    return x	
 
-x = process_images()
+x = process_images(128,128)
