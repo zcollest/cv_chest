@@ -24,12 +24,10 @@ if user == "zach":
     PATH = 'cv_chest/data/sample/'
     SOURCE_IMAGES = os.path.join(PATH, "sample", "images")
     file_name = os.path.join(PATH, "sample_labels.csv")
-
 elif user == "angelo":
 	os.chdir('/home/angelo/Desktop/cv_chest/archive')
 	PATH = 'data/sample/'
 	SOURCE_IMAGES = os.path.join(PATH, 'sample', 'images')
-	file_name = 'sample_labels.csv'
 
 def process_images(width,height):
     """
