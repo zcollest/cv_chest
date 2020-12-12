@@ -15,3 +15,14 @@ If --user is "angelo" the data are taken from the directory Angelo has on his ma
 	1. figure out how to incorporate labels with CNN  => check https://keras.io/api/preprocessing/image/ , basically we need to define the folder structure, tell me when you read this, I can explain what I mean (https://www.tensorflow.org/tutorials/keras/classification)
 	2. normalize array data (probably just by dividng each value by 255) => Yes you are right and I believe there is a function in Keras that does just that.
 
+December 12, 2020:
+WHAT WE DID
+- Decided to use all NIH data, rather than just 5% subsample
+- Going to use 500 samples as a downsampling threshold
+- Eliminating "Hernia" and "Pneumonia" samples from model (110, 322 respective samples)
+
+WHAT WE NEED TO DO
+- Figure out downsampling technique (random sampling, k-means, etc.)
+- Download image data ^^
+
+
