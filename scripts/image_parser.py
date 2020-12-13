@@ -25,9 +25,9 @@ if user == "zach":
     SOURCE_IMAGES = os.path.join(PATH, "sample", "images")
     file_name = os.path.join(PATH, "sample_labels_all.csv")
 elif user == "angelo":
-	os.chdir('/home/angelo/Desktop/cv_chest/archive')
-	PATH = 'data/sample/'
-	SOURCE_IMAGES = os.path.join(PATH, 'sample', 'images')
+    exit()
+	#os.chdir("C:/Users/Angelo/Desktop/archive")
+    #file_name = 'Data_Entry_2017.csv'
 
 def process_images(width,height):
     """
@@ -55,4 +55,3 @@ nosubclass = [(x, sampledict[x]["class"]) for x in sampledict if 'subclass' not 
 nosubclass = pd.DataFrame(nosubclass)
 nosubclasshist = nosubclass.iloc[:,1].hist(figsize = [60,20])
 nosubclass.iloc[:,1].value_counts()
-

@@ -25,4 +25,11 @@ WHAT WE NEED TO DO
 - Figure out downsampling technique (random sampling, k-means, etc.)
 - Download image data ^^
 
+December 13, 2020:
+WHAT ANGELO DID:
+- set up vs code (non è molto ma è un lavoro onesto)
+
+WHAT WE NEED TO DO
+- Figure out downsampling technique (random sampling, k-means, etc.)
+- Download image data ^^
 
