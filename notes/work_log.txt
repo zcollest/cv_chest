@@ -33,3 +33,11 @@ WHAT WE NEED TO DO
 - Figure out downsampling technique (random sampling, k-means, etc.)
 - Download image data ^^
 
+December 15, 2020:
+WHAT ANGELO DID:
+- switched back to random sample dataset because full dataset is to big to handle, might be usefull in the future though
+- Implemented the undersampling method "ClusteredCentroids KNN"
+
+WHAT WE NEED TO DO
+- explore other downsampling technique (random sampling) [MAYBE]
+- Compare dataset before and after downsampling
