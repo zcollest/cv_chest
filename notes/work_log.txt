@@ -39,5 +39,6 @@ WHAT ANGELO DID:
 - Implemented the undersampling method "ClusteredCentroids KNN"
 
 WHAT WE NEED TO DO
+- normalize data of the 1-d representations of the images
 - explore other downsampling technique (random sampling) [MAYBE]
 - Compare dataset before and after downsampling
