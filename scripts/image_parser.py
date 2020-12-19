@@ -8,6 +8,7 @@ import os
 from glob import glob
 import sys
 import argparse
+from sklearn.decomposition import PCA
 
 ### new imports
 from imblearn.under_sampling import ClusterCentroids
@@ -54,8 +55,15 @@ def process_images(width,height):
         print(i,'/',len(images),end='\r')
         #full_size_image = cv.imread(os.path.join("./",SOURCE_IMAGES,img.split('/')[-1]))
         og_image = cv.imread(os.path.join('images',img))
+        gray_image = cv.cvtColor(og_image, cv.COLOR_BGR2GRAY)
+
         x[img] = {}
-        reshaped_resized_image = np.reshape(cv.resize(og_image, (width,height), interpolation=cv.INTER_CUBIC),-1)
+        reshaped_resized_image = []
+        for pixel in np.reshape(cv.resize(gray_image, (width,height), interpolation=cv.INTER_CUBIC),-1):
+            if int(pixel) < 0 or pixel > 255:
+                print('ERROR pixel value to low or too high')
+            else:
+                reshaped_resized_image.append(int(pixel)/255)
         x[img]['array'] = reshaped_resized_image
         x[img]['class'] = samples.iloc[i]['Finding_Labels'].split('|')[0]
         if len(samples.iloc[i]['Finding_Labels'].split('|')) > 1:
@@ -83,13 +91,13 @@ def downsample(minimum_elements = 100,mode = 'centroids'):
     #create dataframe out of dataset
     nosubclass_df = pd.DataFrame(nosubclass)
     #rename class column for better handling
-    nosubclass_df = nosubclass_df.rename(columns={1: "target"})
+    nosubclass_df = nosubclass_df.rename(columns={1: "label"})
     #get indexes and values of the value counts for the classes
-    indexes_values = zip(nosubclass_df.target.value_counts().index,nosubclass_df.target.value_counts())
+    indexes_values = zip(nosubclass_df.label.value_counts().index,nosubclass_df.label.value_counts())
     #remove from dataframe all those classes that have less than 'minimum_elements' entries
     for index,value in indexes_values:
         if int(value) < minimum_elements:
-            nosubclass_df = nosubclass_df[nosubclass_df.target != index]
+            nosubclass_df = nosubclass_df[nosubclass_df.label != index]
     #define dataset for undersampling
     X = [list(sampledict[x]['array']) for x in list(nosubclass_df[0])]
     #trasform dataset into dataframe
@@ -97,24 +105,24 @@ def downsample(minimum_elements = 100,mode = 'centroids'):
     
     
     #map target to integer. Change classes from labels to integer indexes
-    target_to_integer = {} #dictionary for mapping classes strings to classes integer index
-    for integer,target in enumerate(nosubclass_df.target.unique()):
-        target_to_integer[target] = integer
-    targets = []
-    for target in nosubclass_df.target:
-        targets.append(target_to_integer[target])
+    label_to_integer = {} #dictionary for mapping classes strings to classes integer index
+    for integer,label in enumerate(nosubclass_df.label.unique()):
+        label_to_integer[label] = integer
+    labels = []
+    for label in nosubclass_df.label:
+        labels.append(label_to_integer[label])
     #substitute classes in target column in dataframe with their integer indexes 
-    nosubclass_df.target = targets
+    nosubclass_df.label = labels
     
     #visualize distribution (uncomment if you want to use it)
-    nosubclass.target.value_counts().plot(kind='bar', title='Count (target)')
+    #nosubclass.label.value_counts().plot(kind='bar', title='Count (target)')
     
     #undersample by centroids
     if not mode or mode == 'centroids':
         #the ClusterCentroids functions creates a CLusterCentroids object. It provides the function fit_sample which by default will downsample our dataset by means
         #of the KNN algorithm
         cc = ClusterCentroids()
-        X_cc, y_cc = cc.fit_sample(X,nosubclass_df.target)
+        X_cc, y_cc = cc.fit_sample(X,nosubclass_df.label)
     
     return X_cc, y_cc
 

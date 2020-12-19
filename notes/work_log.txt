@@ -42,3 +42,13 @@ WHAT WE NEED TO DO
 - normalize data of the 1-d representations of the images
 - explore other downsampling technique (random sampling) [MAYBE]
 - Compare dataset before and after downsampling
+
+December 19, 2020:
+WHAT WE DID:
+- check the output of the downsampling function
+- normalize data of the 1-d representations of the images
+- grayscale images
+
+WHAT WE NEED TO DO:
+- plot PCA plots for non undersampled dataset and for undersampled dataset and compare them.
+- explore other downsampling technique (random sampling) [MAYBE]
