@@ -52,3 +52,14 @@ WHAT WE DID:
 WHAT WE NEED TO DO:
 - plot PCA plots for non undersampled dataset and for undersampled dataset and compare them.
 - explore other downsampling technique (random sampling) [MAYBE]
+
+December 27, 2020:
+PLAN FOR THE FUTURE:
+- Balancing the classes:
+	a) upsampling - ZACH
+	b) mix of up and down sampling - ANGELO
+- Quality assessment:
+	a) PCA, t-SNE
+- Modeling:
+	a) Convolutional neural network
+	
