@@ -12,6 +12,10 @@ from sklearn.decomposition import PCA
 
 ### new imports
 from imblearn.under_sampling import ClusterCentroids
+from imblearn.under_sampling import TomekLinks
+from imblearn.over_sampling import SMOTE
+
+from collections import Counter
 
 my_parser = argparse.ArgumentParser(description='image parser')
 my_parser.add_argument('--user',
@@ -78,7 +82,27 @@ def process_images(width,height):
 #nosubclasshist = nosubclass.iloc[:,1].hist(figsize = [60,20])
 #nosubclass.iloc[:,1].value_counts()
 
-def downsample(minimum_elements = 100,mode = 'centroids'):
+def sampling_dict(y,n):
+    '''
+    The function takes a list of labels (y) as input and returns a dictionary.
+    The 'n' parameter is the number of samples to be considered for each label. 
+    n cannot be lower than 'minimum_elements'
+    The dictionary has the labels as keys and the number of samples to consider for each label as value.
+    '''
+    res = {}
+    for key in y:
+        res[key] = n
+    return res
+
+tomek_min = 100 
+
+def tomek_ratio(y):
+    target_stats = Counter(y)
+    for key, value in target_stats.items():
+        target_stats[key] = tomek_min
+    return target_stats
+
+def downsample(minimum_elements = 100,mode = 'centroids',undersampling_limit=None,oversampling_limit=None):
     '''
         This function allows to downsample the dataset.
         The minimum_elements parameter specifies the minimum number of elements that is allowed for each class. If a class has less than 'minimum_elements' element it is discarded.
@@ -121,10 +145,67 @@ def downsample(minimum_elements = 100,mode = 'centroids'):
     if not mode or mode == 'centroids':
         #the ClusterCentroids functions creates a CLusterCentroids object. It provides the function fit_sample which by default will downsample our dataset by means
         #of the KNN algorithm
-        cc = ClusterCentroids()
-        X_cc, y_cc = cc.fit_sample(X,nosubclass_df.label)
-    
-    return X_cc, y_cc
+        if undersampling_limit and undersampling_limit >= minimum_elements:
+            cc = ClusterCentroids(sampling_strategy=sampling_dict(nosubclass_df.label,undersampling_limit))
+        else:
+            cc = ClusterCentroids()
+        return cc.fit_sample(X,nosubclass_df.label)
+    elif 'SMOTE' in mode:
+        if len(mode.split('+')) == 1:
+            print('SMOTE')
+            if oversampling_limit:
+                #TODO add check: oversampling limit must be higher than number of elements in biggest class
+                sm = SMOTE(sampling_strategy=sampling_dict(nosubclass_df.label,oversampling_limit),random_state=42)
+            else:
+                sm = SMOTE(random_state=42)
+            X_smote, y_smote = sm.fit_sample(X,nosubclass_df.label)
+            return X_smote, y_smote
+        else:
+            if mode.split('+')[1] == 'KNN':
+                print('SMOTE+KNN')
+                if undersampling_limit and undersampling_limit >= minimum_elements:
+                    cc = ClusterCentroids(sampling_strategy=sampling_dict(nosubclass_df.label,undersampling_limit))
+                else:
+                    cc = ClusterCentroids()
+                x, y = cc.fit_sample(X,nosubclass_df.label)
+                sm = SMOTE(random_state=42)
+                return sm.fit_sample(x,y)
+            #TODO still have to figure out to tell Tomek algorithm I want a specific number of samples for each label
+            #elif mode.split('+')[1] == 'Tomek':
+                #print('SMOTE+Tomek')
+                #if undersampling_limit and undersampling_limit >= minimum_elements:
+                #    tl = TomekLinks(sampling_strategy=tomek_ratio)
+                #else:
+                #    tl = TomekLinks()
+                #x , y = tl.fit_sample(X,nosubclass_df.label)
+                #sm = SMOTE(random_state=42)
+                #return sm.fit_sample(x,y)
 
-X_cc,y_cc = downsample()
+
+X_centroids,y_centroids = downsample(mode='centroids')
+X_smote_knn,y_smote_knn = downsample(mode='SMOTE+KNN',undersampling_limit=100,oversampling_limit=500)
+#X_smote_tomek,y_smote_tomek = downsample(mode='SMOTE+Tomek',undersampling_limit=100,oversampling_limit=500)
+
+#TODO for some reason i cannot get to color the data the way I want to
+def PCA_plot(data,labels):
+    pca = PCA(n_components=2)
+    PCA_data = pca.fit_transform(data)
+    principalDf = pd.DataFrame(data = PCA_data, columns=['PC1','PC2'])
+    print(data.shape)
+    print(PCA_data.shape)
+    #principalDf['target'] = labels
+    #finalDf = principalDf
+    
+    import matplotlib.pyplot as plt
+
+    plt.scatter(PCA_data[:,0], PCA_data[:,1],
+            c=list(labels), edgecolor='none', alpha=0.5,
+            cmap=plt.cm.get_cmap('rainbow', 10))
+    plt.xlabel('component 1')
+    plt.ylabel('component 2')
+    plt.colorbar()
+    plt.show()
+
+PCA_plot(X_centroids,y_centroids)
+
 
