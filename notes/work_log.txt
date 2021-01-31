@@ -57,9 +57,15 @@ December 27, 2020:
 PLAN FOR THE FUTURE:
 - Balancing the classes:
 	a) upsampling - ZACH
-	b) mix of up and down sampling - ANGELO
+	b) mix of up and down sampling - ANGELO 
 - Quality assessment:
 	a) PCA, t-SNE
 - Modeling:
 	a) Convolutional neural network
+
+January 31, 2021:
+- DONE
+	mix of up and down sampling
+	PCA, T-SNE
+	Convulational neural network, 1,3,4,4+augmentation CNN
 	
