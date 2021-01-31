@@ -184,28 +184,236 @@ def downsample(minimum_elements = 100,mode = 'centroids',undersampling_limit=Non
 
 X_centroids,y_centroids = downsample(mode='centroids')
 X_smote_knn,y_smote_knn = downsample(mode='SMOTE+KNN',undersampling_limit=100,oversampling_limit=500)
-#X_smote_tomek,y_smote_tomek = downsample(mode='SMOTE+Tomek',undersampling_limit=100,oversampling_limit=500)
 
 #TODO for some reason i cannot get to color the data the way I want to
-def PCA_plot(data,labels):
+def PCA_plot(data,labels,mode,plot):
     pca = PCA(n_components=2)
     PCA_data = pca.fit_transform(data)
     principalDf = pd.DataFrame(data = PCA_data, columns=['PC1','PC2'])
     print(data.shape)
     print(PCA_data.shape)
+    print(principalDf.head(5))
+    print(pca.explained_variance_ratio_)
     #principalDf['target'] = labels
     #finalDf = principalDf
     
-    import matplotlib.pyplot as plt
+    if plot:
+        import matplotlib.pyplot as plt
 
-    plt.scatter(PCA_data[:,0], PCA_data[:,1],
+        plt.scatter(PCA_data[:,0], PCA_data[:,1],
             c=list(labels), edgecolor='none', alpha=0.5,
             cmap=plt.cm.get_cmap('rainbow', 10))
-    plt.xlabel('component 1')
-    plt.ylabel('component 2')
-    plt.colorbar()
-    plt.show()
+        plt.xlabel('component 1')
+        plt.ylabel('component 2')
+        plt.colorbar()
+        plt.savefig(os.path.join('PCA_'+mode+'.png'))
+        plt.close()
 
-PCA_plot(X_centroids,y_centroids)
+#PCA_plot(X_centroids,y_centroids,'centroids',False)
+#PCA_plot(X_smote_knn,y_smote_knn,'SMOTE+KNN',False)
+
+def TSNE_plot(data,labels,mode,plot):
+    from sklearn.manifold import TSNE
+    X_embedded = TSNE(n_components=2).fit_transform(data)
+    print(X_embedded.shape)
+    
+    if plot:
+        import matplotlib.pyplot as plt
+
+        plt.scatter(X_embedded[:,0], X_embedded[:,1],
+            c=list(labels), edgecolor='none', alpha=0.5,
+            cmap=plt.cm.get_cmap('rainbow', 10))
+        plt.xlabel('component 1')
+        plt.ylabel('component 2')
+        plt.colorbar()
+        plt.savefig(os.path.join('T-SNE_'+mode+'.png'))
+        plt.close()
+
+from keras.utils import to_categorical 
+
+def split_data_into_training_and_test_set(X,y,img_rows,img_cols):
+    from sklearn.model_selection import train_test_split
+    
+    X_train, X_val, y_train, y_val = train_test_split(X.to_numpy(), to_categorical(y.to_numpy()), test_size=0.3, random_state=13)
+    X_train = X_train.reshape(X_train.shape[0], img_rows, img_cols, 1)
+    X_train = X_train.astype('float32')
+    X_val = X_val.reshape(X_val.shape[0], img_rows, img_cols, 1)
+    X_val = X_val.astype('float32')
+    return X_train, X_val, y_train, y_val 
+
+
+#X_train, X_val, y_train, y_val = split_data_into_training_and_test_set(X_centroids,y_centroids,32,32)
+
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+
+class CNN1():
+
+    def __init__(self,input_shape,N_final_layer_nodes):
+
+        self.cnn1 = Sequential()
+        self.cnn1.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        self.cnn1.add(MaxPooling2D(pool_size=(2, 2)))
+        self.cnn1.add(Dropout(0.2))
+
+        self.cnn1.add(Flatten())
+
+        self.cnn1.add(Dense(128, activation='relu'))
+        self.cnn1.add(Dense(N_final_layer_nodes, activation='softmax'))
+    
+    def compile(self):
+        self.cnn1.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adam(),
+              metrics=['accuracy'])
+        print(self.cnn1.summary())
+    
+    def train(self,X_train, X_val, y_train, y_val):
+        self.cnn1.fit(X_train, y_train,
+          batch_size=256,
+          epochs=30,
+          verbose=1,
+          validation_data=(X_val, y_val))
+    
+    def evaluate(self,X,y):
+        score = self.cnn1.evaluate(X,y)
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
+
+class CNN3():
+
+    def __init__(self,input_shape,N_final_layer_nodes):
+        self.cnn3 = Sequential()
+        self.cnn3.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        self.cnn3.add(MaxPooling2D((2, 2)))
+        self.cnn3.add(Dropout(0.25))
+
+        self.cnn3.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+        self.cnn3.add(MaxPooling2D(pool_size=(2, 2)))
+        self.cnn3.add(Dropout(0.25))
+
+        self.cnn3.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+        self.cnn3.add(Dropout(0.4))
+
+        self.cnn3.add(Flatten())
+
+        self.cnn3.add(Dense(128, activation='relu'))
+        self.cnn3.add(Dropout(0.3))
+        self.cnn3.add(Dense(N_final_layer_nodes, activation='softmax'))
+        
+    def compile(self):
+        self.cnn3.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adam(),
+              metrics=['accuracy'])
+        print(self.cnn3.summary())
+    
+    def train(self,X_train, X_val, y_train, y_val):
+        self.cnn3.fit(X_train, y_train,
+          batch_size=256,
+          epochs=30,
+          verbose=1,
+          validation_data=(X_val, y_val))
+    
+    def evaluate(self,X,y):
+        score = self.cnn3.evaluate(X,y)
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
+
+class CNN4():
+
+    def __init__(self,input_shape,N_final_layer_nodes):
+        self.cnn4 = Sequential()
+        self.cnn4.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        self.cnn4.add(BatchNormalization())
+
+        self.cnn4.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
+        self.cnn4.add(BatchNormalization())
+        self.cnn4.add(MaxPooling2D(pool_size=(2, 2)))
+        self.cnn4.add(Dropout(0.25))
+
+        self.cnn4.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+        self.cnn4.add(BatchNormalization())
+        self.cnn4.add(Dropout(0.25))
+
+        self.cnn4.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+        self.cnn4.add(BatchNormalization())
+        self.cnn4.add(MaxPooling2D(pool_size=(2, 2)))
+        self.cnn4.add(Dropout(0.25))
+
+        self.cnn4.add(Flatten())
+
+        self.cnn4.add(Dense(512, activation='relu'))
+        self.cnn4.add(BatchNormalization())
+        self.cnn4.add(Dropout(0.5))
+
+        self.cnn4.add(Dense(128, activation='relu'))
+        self.cnn4.add(BatchNormalization())
+        self.cnn4.add(Dropout(0.5))
+
+        self.cnn4.add(Dense(N_final_layer_nodes, activation='softmax'))
+        
+    def compile(self):
+        self.cnn4.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adam(),
+              metrics=['accuracy'])
+        print(self.cnn4.summary())
+    
+    def train(self,X_train, X_val, y_train, y_val):
+        self.cnn4.fit(X_train, y_train,
+          batch_size=256,
+          epochs=30,
+          verbose=1,
+          validation_data=(X_val, y_val))
+    
+    def evaluate(self,X,y):
+        score = self.cnn4.evaluate(X,y)
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
+
+    def fit_generator(self,batches,val_batches,steps_per_epoch,validation_steps):
+        self.cnn4.fit_generator(batches, steps_per_epoch=steps_per_epoch, epochs=50,
+            validation_data=val_batches, validation_steps=validation_steps, use_multiprocessing=False)
+
+def test_CNN(X,y,cnn_type='cnn1'):
+    X_train, X_val, y_train, y_val = split_data_into_training_and_test_set(X_smote_knn,y_smote_knn,32,32)
+    if cnn_type == 'cnn1':
+        cnn = CNN1((32,32,1),len(set(y)))
+        cnn.compile()
+        cnn.train(X_train,X_val,y_train,y_val)
+        X_test = X.to_numpy()
+        y_test = to_categorical(y.to_numpy())
+        X_test = X.reshape(X.shape[0], 32, 32, 1)
+        cnn.evaluate(X_test, y_test)
+    elif cnn_type == 'cnn3':
+        cnn = CNN3((32,32,1),len(set(y)))
+        cnn.compile()
+        cnn.train(X_train,X_val,y_train,y_val)
+        X_test = X.to_numpy()
+        y_test = to_categorical(y.to_numpy())
+        X_test = X.reshape(X.shape[0], 32, 32, 1)
+        cnn.evaluate(X_test, y_test)
+    elif cnn_type == 'cnn4':
+        cnn = CNN4((32,32,1),len(set(y)))
+        cnn.compile()
+        cnn.train(X_train,X_val,y_train,y_val)
+        X_test = X.to_numpy()
+        y_test = to_categorical(y.to_numpy())
+        X_test = X.reshape(X.shape[0], 32, 32, 1)
+        cnn.evaluate(X_test, y_test)
+    elif cnn_type == 'augment':
+        from keras.preprocessing.image import ImageDataGenerator
+        cnn = CNN4((32,32,1),len(set(y)))
+        cnn.compile()
+        cnn.train(X_train,X_val,y_train,y_val)
+        gen = ImageDataGenerator(rotation_range=8, width_shift_range=0.08, shear_range=0.3,
+                               height_shift_range=0.08, zoom_range=0.08)
+        batches = gen.flow(X_train, y_train, batch_size=256)
+        val_batches = gen.flow(X_val, y_val, batch_size=256)
+        cnn.fit_generator(batches,val_batches,len(X_train)//256,len(X_val)//256)
+
+test_CNN(X_smote_knn,y_smote_knn,'augment')
+
+
 
 
