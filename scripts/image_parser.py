@@ -376,7 +376,7 @@ class CNN4():
             validation_data=val_batches, validation_steps=validation_steps, use_multiprocessing=False)
 
 def test_CNN(X,y,cnn_type='cnn1'):
-    X_train, X_val, y_train, y_val = split_data_into_training_and_test_set(X_smote_knn,y_smote_knn,32,32)
+    X_train, X_val, y_train, y_val = split_data_into_training_and_test_set(X,y,32,32)
     if cnn_type == 'cnn1':
         cnn = CNN1((32,32,1),len(set(y)))
         cnn.compile()
