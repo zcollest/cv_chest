@@ -413,7 +413,3 @@ def test_CNN(X,y,cnn_type='cnn1'):
         cnn.fit_generator(batches,val_batches,len(X_train)//256,len(X_val)//256)
 
 test_CNN(X_smote_knn,y_smote_knn,'augment')
-
-
-
-
